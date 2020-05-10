@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build posix",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}/posix"
+      },
+      "command": "rake",
+      "args": ["test"],
+      "group": "test",
+    }
+  ]
+}

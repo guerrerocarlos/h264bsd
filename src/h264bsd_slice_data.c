@@ -142,6 +142,8 @@ u32 h264bsdDecodeSliceData(strmData_t *pStrmData, storage_t *pStorage,
 
         if (!IS_I_SLICE(pSliceHeader->sliceType))
         {
+            // DEBUG(("NOT I_SLICE "));
+
             if (!prevSkipped)
             {
                 tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, &skipRun);
@@ -166,7 +168,7 @@ u32 h264bsdDecodeSliceData(strmData_t *pStrmData, storage_t *pStorage,
 
         if (skipRun)
         {
-            DEBUG(("Skipping macroblock %d\n", currMbAddr));
+            // DEBUG(("Skipping macroblock %d\n", currMbAddr));
             skipRun--;
         }
         else

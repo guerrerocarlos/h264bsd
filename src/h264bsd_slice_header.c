@@ -116,7 +116,8 @@ u32 h264bsdDecodeSliceHeader(strmData_t *pStrmData, sliceHeader_t *pSliceHeader,
 
     memset(pSliceHeader, 0, sizeof(sliceHeader_t));
 
-    picSizeInMbs = pSeqParamSet->picWidthInMbs * pSeqParamSet->picHeightInMbs;
+    picSizeInMbs = pSeqParamSet->picWidthInMbs * pSeqParamSet->picHeightInMbs; 
+    // fprintf("picSizeInMbs: %d", picSizeInMbs);
     tmp = h264bsdDecodeExpGolombUnsigned(pStrmData, &value);
     if (tmp != HANTRO_OK)
         return(tmp);
@@ -258,6 +259,7 @@ u32 h264bsdDecodeSliceHeader(strmData_t *pStrmData, sliceHeader_t *pSliceHeader,
 
     if (IS_P_SLICE(pSliceHeader->sliceType))
     {
+        DEBUG(("IS_P_SLICE "));
         tmp = h264bsdGetBits(pStrmData, 1);
         if (tmp == END_OF_STREAM)
             return(HANTRO_NOK);
@@ -291,6 +293,7 @@ u32 h264bsdDecodeSliceHeader(strmData_t *pStrmData, sliceHeader_t *pSliceHeader,
 
     if (IS_P_SLICE(pSliceHeader->sliceType))
     {
+        DEBUG(("IS_P_SLICE (reorder)\n"));
         tmp = RefPicListReordering(pStrmData,
             &pSliceHeader->refPicListReordering,
             pSliceHeader->numRefIdxL0Active,

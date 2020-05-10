@@ -123,7 +123,7 @@ static void Transform(i32 *data);
 
 u32 h264bsdConceal(storage_t *pStorage, image_t *currImage, u32 sliceType)
 {
-
+    printf("h264bsdConceal\n");
 /* Variables */
 
     u32 i, j;

@@ -157,6 +157,7 @@ u32 h264bsdDecodeMacroblockLayer(strmData_t *pStrmData,
 
     if (IS_I_SLICE(sliceType))
     {
+        DEBUG(("I_SLICE (macroblock)"));
         if ((value + 6) > 31 || tmp != HANTRO_OK)
             return(HANTRO_NOK);
         pMbLayer->mbType = (mbType_e)(value + 6);

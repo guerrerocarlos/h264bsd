@@ -1,11 +1,11 @@
 CC = "cc"
 AR = "ar"
 
-if ENV["DEBUG"]
-  CC_FLAGS = ENV["CC_FLAGS"] || "-std=gnu99 -O0 -g4 -D_ASSERT_USED -D_ERROR_PRINT"
-else
-  CC_FLAGS = ENV["CC_FLAGS"] || "-std=gnu99 -O3 -D_ERROR_PRINT"
-end
+# if ENV["DEBUG"]
+  CC_FLAGS = ENV["CC_FLAGS"] || "-std=gnu99 -O0 -g -D_ASSERT_USED -D_ERROR_PRINT -D_DEBUG_PRINT"
+# else
+  # CC_FLAGS = ENV["CC_FLAGS"] || "-std=gnu99 -O3 -g -D_ERROR_PRINT"
+# end
 
 static_lib = "lib/libh264bsd.a"
 test_app = "bin/test_h264bsd"
