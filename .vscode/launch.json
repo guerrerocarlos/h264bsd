@@ -6,13 +6,16 @@
   "configurations": [
     {
       "name": "(lldb) Test",
+      // "osx": {
+      //   "MIMode": "lldb"
+      // },
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/posix/bin/test_h264bsd",
       "args": [
         "./test/test_640x360.h264"
       ],
-      "stopAtEntry": true,
+      // "stopAtEntry": true,
       "cwd": "${workspaceFolder}/",
       "environment": [
         {

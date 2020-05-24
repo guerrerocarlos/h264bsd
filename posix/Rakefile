@@ -69,6 +69,11 @@ task :test_output => [test_app] do |t|
   sh "#{test_app} -o ../test/test_1920x1080_posix.yuv ../test/test_1920x1080.h264"
 end
 
+# Run test application
+task :build => [test_app] do |t|
+  # sh "#{test_app} ../test/test_1920x1080.h264"
+end
+
 task :clean do
   FileUtils.rm_rf("obj")
   FileUtils.rm_rf("bin")

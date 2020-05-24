@@ -150,6 +150,7 @@ void decodeContent (u8* contentBuffer, size_t contentSize) {
 
     switch (result) {
       case H264BSD_PIC_RDY:
+        printf(" !:P! -__-  PIC_RDY\n");
         pic = h264bsdNextOutputPicture(&dec, &picId, &isIdrPic, &numErrMbs);
         ++numPics;
         if (outputPath) savePic(pic, width, height, numPics);
