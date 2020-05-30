@@ -29,12 +29,16 @@ function onPictureReady() {
     var height = decoder.outputPictureHeight();
     var croppingParams = decoder.croppingParams();
     var output = decoder.nextOutputPicture();
-    // console.log('h264bsdProfile:', decoder.h264bsdProfile())
+    var mbs = decoder.mbs();
+    console.log('mbs:', mbs.buffer, mbs)
+    console.log('mbsHeight:', decoder.PicHeightInMbs())
+    console.log('mbsWidth:', decoder.PicWidthInMbs())
 
     postMessage({
       'type' : 'pictureReady',
       'width' : width,
       'height' : height,
+      'mbs' : mbs.buffer,
       'croppingParams' : croppingParams,
       'data' : output.buffer,
     }, [output.buffer]);
@@ -55,7 +59,7 @@ function onHeadersReady() {
 
 function decodeLoop() {
     var result = decoder.decode();
-    console.log("result", result)
+    // console.log("result", result)
     switch(result) {
     case H264bsdDecoder.ERROR:
         postMessage({'type': 'decodeError'});

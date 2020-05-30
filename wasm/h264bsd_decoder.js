@@ -75,9 +75,65 @@ H264bsdDecoder.NO_INPUT = 1024;
  */
 H264bsdDecoder.prototype.h264bsdProfile = function() {
     var module = this.module;
+    var pStorage = this.pStorage;
 
-    return module._h264bsdProfile();
+    return module._h264bsdProfile(pStorage);
 };
+
+/**
+ * Returns the next output picture as an I420 encoded image.
+ */
+H264bsdDecoder.prototype.mbs = function() {
+    var module = this.module;
+    var pStorage = this.pStorage;
+
+    // console.log("pStorage", pStorage)
+
+    var pBytes = module._h264bsdMbs(pStorage);
+    var mbsOutputLength = module._h264bsdMbsPicSizeInMbs(pStorage);
+    console.log("mbsOutputLength", mbsOutputLength)
+
+    var outputLength = mbsOutputLength; // 4;//this.outputPictureSizeBytes();
+    var outputBytes = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
+
+    return outputBytes;
+    
+};
+
+H264bsdDecoder.prototype.PicSizeInMbs = function() {
+    var module = this.module;
+    var pStorage = this.pStorage;
+
+    return module._h264bsdMbsPicSizeInMbs(pStorage);
+};
+
+H264bsdDecoder.prototype.PicHeightInMbs = function() {
+    var module = this.module;
+    var pStorage = this.pStorage;
+
+    return module._h264bsdMbsPicHeightInMbs(pStorage);
+};
+H264bsdDecoder.prototype.PicWidthInMbs = function() {
+    var module = this.module;
+    var pStorage = this.pStorage;
+
+    return module._h264bsdMbsPicWidthInMbs(pStorage);
+};
+// H264bsdDecoder.prototype.nextOutputPictureCarlosTemplate = function() {
+//     var module = this.module;
+//     var pStorage = this.pStorage;
+//     var pPicId = this.pPicId;
+//     var pIsIdrPic = this.pIsIdrPic;
+//     var pNumErrMbs = this.pNumErrMbs;
+
+//     var pBytes = module._h264bsdNextOutputPicture(pStorage, pPicId, pIsIdrPic, pNumErrMbs);
+
+//     var outputLength = this.outputPictureSizeBytes();
+//     var outputBytes = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
+
+//     return outputBytes;
+// };
+
 
 /**
  * Clean up memory used by the decoder

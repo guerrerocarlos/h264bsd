@@ -84,6 +84,7 @@ u32 h264bsdCheckValidParamSets(storage_t *pStorage);
 void h264bsdFlushBuffer(storage_t *pStorage);
 
 u32 h264bsdProfile(storage_t *pStorage);
+u8* h264bsdMbs(storage_t *pStorage);
 
 storage_t* h264bsdAlloc();
 void h264bsdFree(storage_t *pStorage);

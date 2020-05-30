@@ -20,7 +20,11 @@ exported_functions = [
 	"_h264bsdPicWidth",
 	"_h264bsdPicHeight",
 	"_h264bsdCroppingParams",
-	"_h264bsdProfile"
+	"_h264bsdProfile",
+	"_h264bsdMbs",
+	"_h264bsdMbsPicSizeInMbs",
+	"_h264bsdMbsPicHeightInMbs",
+	"_h264bsdMbsPicWidthInMbs",
 ]
 
 exported_runtime_methods = [

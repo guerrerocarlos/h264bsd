@@ -1091,6 +1091,67 @@ u32 h264bsdProfile(storage_t *pStorage)
 
 /*------------------------------------------------------------------------------
 
+    Function: h264bsdMbs
+
+        Functional description:
+            Get macroblocks information
+
+        Inputs:
+            pStorage    pointer to storage structure
+
+        Outputs:
+            macroblocks information
+
+------------------------------------------------------------------------------*/
+u8* h264bsdMbs(storage_t *pStorage)
+{
+
+    u32 mbsSize = pStorage->picSizeInMbs;
+    u8 *result = malloc(sizeof(u8) * mbsSize);
+
+    // result[0] = pStorage->mb[0].refPic;
+
+    // pStorage->mb->mv->hor
+
+    for(int i = 0 ; i < mbsSize ; i++) {
+        result[i] = pStorage->mb[i].mv->hor;
+    }
+    // result[0] = pStorage->mb[0]->refPic[0];
+    // result[1] = pStorage->mb[0]->refPic[1];
+    // result[2] = pStorage->mb[0]->refPic[2];
+    // result[3] = pStorage->mb[0]->refPic[3]; 
+
+    // return pStorage->picSizeInMbs;
+    // return [pStorage->mb[0].refPic[0], pStorage->mb[0].refPic[1]];
+    // if (pStorage->activeSps)
+    //     return pStorage->activeSps->profileIdc;
+    // else
+    //     return 0;
+    return result;
+}
+
+
+u8* h264bsdMbsPicSizeInMbs(storage_t *pStorage)
+{
+    return pStorage->picSizeInMbs;
+}
+
+u32* h264bsdMbsPicHeightInMbs(storage_t *pStorage)
+{
+    return pStorage->activeSps->picHeightInMbs;
+}
+
+u32* h264bsdMbsPicWidthInMbs(storage_t *pStorage)
+{
+    return pStorage->activeSps->picWidthInMbs;
+}
+// u8* h264bsdMbsPicSizeInMbs(storage_t *pStorage)
+// {
+//     return pStorage->picSizeInMbs;
+// }
+
+/*------------------------------------------------------------------------------
+
     Function name: h264bsdAlloc
 
         Functional description:

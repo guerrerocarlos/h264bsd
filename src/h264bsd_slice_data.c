@@ -97,6 +97,7 @@ u32 h264bsdDecodeSliceData(strmData_t *pStrmData, storage_t *pStorage,
     u32 currMbAddr;
     u32 moreMbs;
     u32 mbCount;
+    u32 mbCountAll;
     i32 qpY;
     macroblockLayer_t *mbLayer;
 
@@ -125,6 +126,7 @@ u32 h264bsdDecodeSliceData(strmData_t *pStrmData, storage_t *pStorage,
     pStorage->slice->lastMbAddr = 0;
 
     mbCount = 0;
+    mbCountAll = 0;
     /* initial quantization parameter for the slice is obtained as the sum of
      * initial QP for the picture and sliceQpDelta for the current slice */
     qpY = (i32)pStorage->activePps->picInitQp + pSliceHeader->sliceQpDelta;
@@ -136,7 +138,7 @@ u32 h264bsdDecodeSliceData(strmData_t *pStrmData, storage_t *pStorage,
             EPRINT("Primary and already decoded");
             return(HANTRO_NOK);
         }
-
+        // printf("currMbAddr: %d\n", currMbAddr);
         SetMbParams(pStorage->mb + currMbAddr, pSliceHeader,
             pStorage->slice->sliceId, pStorage->activePps->chromaQpIndexOffset);
 
@@ -197,7 +199,7 @@ u32 h264bsdDecodeSliceData(strmData_t *pStrmData, storage_t *pStorage,
          * for the first time (redundant slices) */
         if (pStorage->mb[currMbAddr].decoded == 1)
             mbCount++;
-
+        mbCountAll++;
         /* keep on processing as long as there is stream data left or
          * processing of macroblocks to be skipped based on the last skipRun is
          * not finished */
