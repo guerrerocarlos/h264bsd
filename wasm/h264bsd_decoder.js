@@ -33,6 +33,8 @@
  * When you're done decoding, make sure to call release() to clean up internal buffers.
  */
 
+
+ 
 function H264bsdDecoder(module) {
     this.module = module;
     this.released = false;
@@ -65,6 +67,17 @@ H264bsdDecoder.ERROR = 3;
 H264bsdDecoder.PARAM_SET_ERROR = 4;
 H264bsdDecoder.MEMALLOC_ERROR = 5;
 H264bsdDecoder.NO_INPUT = 1024;
+
+/**
+ * Returns an object containing the width and height of output pictures in pixels.
+ * This value is only valid after at least one call to decode() has returned H264bsdDecoder.HDRS_RDY
+ * You can also use onHeadersReady callback to determine when this value changes.
+ */
+H264bsdDecoder.prototype.h264bsdProfile = function() {
+    var module = this.module;
+
+    return module._h264bsdProfile();
+};
 
 /**
  * Clean up memory used by the decoder
@@ -201,7 +214,7 @@ H264bsdDecoder.prototype.decode = function() {
     this.pInput = pInput;
     this.inputLength = inputLength;
     this.inputOffset = inputOffset;
-
+    
     if(retCode == H264bsdDecoder.PIC_RDY && this.onPictureReady instanceof Function) {
         this.onPictureReady();
     }

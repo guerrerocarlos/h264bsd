@@ -1927,7 +1927,7 @@ void h264bsdPredictSamples(
             break;
     }
 
-    /* chroma */
+    /* chroma */ // carlos, log this in javascript to see the values
     PredictChroma(
       data + 16*16 + (partY>>1)*8 + (partX>>1),
       xA + partX,

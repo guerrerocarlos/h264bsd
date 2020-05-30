@@ -12,6 +12,7 @@ var Module = {
 
 function onMessage(e) {
     var message = e.data;
+    console.log("ON MESSAGE", message)
     switch(message.type) {
     case 'queueInput' :
         decoder.queueInput(message.data);
@@ -28,6 +29,7 @@ function onPictureReady() {
     var height = decoder.outputPictureHeight();
     var croppingParams = decoder.croppingParams();
     var output = decoder.nextOutputPicture();
+    // console.log('h264bsdProfile:', decoder.h264bsdProfile())
 
     postMessage({
       'type' : 'pictureReady',
@@ -53,7 +55,7 @@ function onHeadersReady() {
 
 function decodeLoop() {
     var result = decoder.decode();
-
+    console.log("result", result)
     switch(result) {
     case H264bsdDecoder.ERROR:
         postMessage({'type': 'decodeError'});

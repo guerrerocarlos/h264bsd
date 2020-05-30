@@ -44,6 +44,7 @@ void loadContent(char* contentPath, u8* contentBuffer, size_t contentSize) {
 static FILE *outputFile = NULL;
 
 void savePic(u8* picData, int width, int height, int picNum) {
+  printf("savePic %d %d %d", width, height, picNum);
   if(outputFile == NULL) {
     outputFile = fopen(outputPath, "w");
     if (outputFile == NULL) {
@@ -150,9 +151,10 @@ void decodeContent (u8* contentBuffer, size_t contentSize) {
 
     switch (result) {
       case H264BSD_PIC_RDY:
-        printf(" !:P! -__-  PIC_RDY\n");
+        printf(" o->-< PIC_RDY\n");
         pic = h264bsdNextOutputPicture(&dec, &picId, &isIdrPic, &numErrMbs);
         ++numPics;
+        printf("Got Pic %d %d %d", width, height, numPics);
         if (outputPath) savePic(pic, width, height, numPics);
         if (comparePath) totalErrors += comparePics(pic, width, height, numPics);
         break;
