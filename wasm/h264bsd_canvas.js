@@ -239,25 +239,59 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
 
     console.log("heightStep", heightStep, widthStep)
 
+    for (var i = 0; i < imageData.data.length; i++) {
+        imageData.data[i] = 0
+    }
+
     // var positions = []
     for (var j = 0; j < mbsHeight; j += 1) {
         for (var i = 0; i < mbsWidth; i += 1) {
-            x = i * widthStep * 4 + 8 * 4
-            y = (j * heightStep + 8) * 4 * width 
 
-            // imageData.data[x + y] = 0
-            // imageData.data[x + y + 1] = 0
-            // imageData.data[x + y + 2] = 0
-            // imageData.data[x + y + 3] = 250
+            hval = data.hor[i + j * mbsWidth]
+            vval = data.ver[i + j * mbsWidth]
 
-            val = data.hor[i + j * mbsWidth]
+            x = (i * widthStep) * 4 // + 8 * 4
+            y = (j * heightStep ) * 4 * width
 
-            // positions.push([i, j, x, y, val])
+            imageData.data[x + y + 3] = 250   
 
-            // imageData.data[x + y] = 250 - val     // R
-            // imageData.data[x + y + 1] = 250 - val // G
-            // imageData.data[x + y + 2] = 250 - val // B
-            imageData.data[x + y + 3] = val       // A
+            for (var hv = 0; hv < (hval / 255 * 16); hv++) {
+                x = (i * widthStep + hv) * 4 + 8 * 4
+                y = (j * heightStep + 8) * 4 * width
+
+                // imageData.data[x + y] = 0
+                // imageData.data[x + y + 1] = 0
+                // imageData.data[x + y + 2] = 0
+                // imageData.data[x + y + 3] = 250
+
+
+                // positions.push([i, j, x, y, val])
+
+                // imageData.data[x + y] = 250 - val     // R
+                imageData.data[x + y + 1] = hval // G
+                // imageData.data[x + y + 2] = 250 - val // B
+                imageData.data[x + y + 3] = hval       // A
+
+            }
+
+            for (var vv = 0; vv < (vval / 255 * 16); vv++) {
+                x = (i * widthStep) * 4 + 8 * 4
+                y = (j * heightStep + 8 + vv) * 4 * width
+
+                // imageData.data[x + y] = 0
+                // imageData.data[x + y + 1] = 0
+                // imageData.data[x + y + 2] = 0
+                // imageData.data[x + y + 3] = 250
+
+
+                // positions.push([i, j, x, y, val])
+
+                // imageData.data[x + y] = 250 - val     // R
+                // imageData.data[x + y + 1] = 250 - val // G
+                imageData.data[x + y + 2] = 250 - hval // B
+                imageData.data[x + y + 3] = hval       // A
+
+            }
 
             // console.log(i, j)
             // rgba = rgba.concat([0,0,0,1])

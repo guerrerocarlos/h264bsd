@@ -23,3 +23,9 @@ The decoder only works nicely if it has a single consistent stream to deal with.
 * *ios* XCode project and objective-c wrapper classes.
 
 This project was heavily inspired by [Broadway.js](https://github.com/mbebenita/Broadway). Much love to them for pioneering the idea.
+
+
+## Carlos:
+
+> ffmpeg -i test_telegram1.mp4 -vcodec copy -an -bsf:v h264_mp4toannexb test.h264
+> ffmpeg -i test_telegram1.mp4 -pix_fmt yuv420p -c:v libx264 -x264-params keyint=40 -profile:v baseline -f rawvideo test2.h264

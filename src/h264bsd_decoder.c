@@ -55,6 +55,7 @@
 #include "h264bsd_deblocking.h"
 #include "h264bsd_conceal.h"
 #include "h264bsd_storage.h"
+#include <time.h>
 
 /*------------------------------------------------------------------------------
     2. External compiler flags
@@ -152,6 +153,7 @@ u32 h264bsdInit(storage_t *pStorage, u32 noOutputReordering)
 u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u32 picId,
     u32 *readBytes)
 {
+
 
 /* Variables */
 
