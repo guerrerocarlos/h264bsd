@@ -1130,6 +1130,29 @@ u8* h264bsdMbs(storage_t *pStorage)
     return result;
 }
 
+u8* h264bsdMbsHor(storage_t *pStorage)
+{
+
+    u32 mbsSize = pStorage->picSizeInMbs;
+    u8 *result = malloc(sizeof(u8) * mbsSize);
+    for(int i = 0 ; i < mbsSize ; i++) {
+        result[i] = pStorage->mb[i].mv->hor;
+    }
+    return result;
+}
+
+u8* h264bsdMbsVer(storage_t *pStorage)
+{
+
+    u32 mbsSize = pStorage->picSizeInMbs;
+    u8 *result = malloc(sizeof(u8) * mbsSize);
+    for(int i = 0 ; i < mbsSize ; i++) {
+        result[i] = pStorage->mb[i].mv->ver;
+    }
+    return result;
+}
+
+
 
 u8* h264bsdMbsPicSizeInMbs(storage_t *pStorage)
 {

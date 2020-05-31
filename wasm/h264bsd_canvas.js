@@ -24,12 +24,13 @@
  * This class can be used to render output pictures from an H264bsdDecoder to a canvas element.
  * If available the content is rendered using WebGL.
  */
-function H264bsdCanvas(canvas, forceNoGL) {
+function H264bsdCanvas(canvas, forceNoGL, mbcanvas) {
     this.canvasElement = canvas;
+    this.mbcanvasElement = mbcanvas;
 
-    if(!forceNoGL) this.initContextGL();
+    if (!forceNoGL) this.initContextGL();
 
-    if(this.contextGL) {
+    if (this.contextGL) {
         this.initProgram();
         this.initBuffers();
         this.initTextures();
@@ -39,43 +40,43 @@ function H264bsdCanvas(canvas, forceNoGL) {
 /**
  * Returns true if the canvas supports WebGL
  */
-H264bsdCanvas.prototype.isWebGL = function() {
+H264bsdCanvas.prototype.isWebGL = function () {
     return this.contextGL;
 }
 
 /**
  * Create the GL context from the canvas element
  */
-H264bsdCanvas.prototype.initContextGL = function() {
+H264bsdCanvas.prototype.initContextGL = function () {
     var canvas = this.canvasElement;
     var gl = null;
 
     var validContextNames = ["webgl", "experimental-webgl", "moz-webgl", "webkit-3d"];
     var nameIndex = 0;
 
-    while(!gl && nameIndex < validContextNames.length) {
+    while (!gl && nameIndex < validContextNames.length) {
         var contextName = validContextNames[nameIndex];
-        
+
         try {
             gl = canvas.getContext(contextName);
         } catch (e) {
             gl = null;
         }
 
-        if(!gl || typeof gl.getParameter !== "function") {
+        if (!gl || typeof gl.getParameter !== "function") {
             gl = null;
-        }    
+        }
 
         ++nameIndex;
     }
- 
+
     this.contextGL = gl;
 }
 
 /**
  * Initialize GL shader program
  */
-H264bsdCanvas.prototype.initProgram = function() {
+H264bsdCanvas.prototype.initProgram = function () {
     var gl = this.contextGL;
 
     var vertexShaderScript = [
@@ -85,10 +86,10 @@ H264bsdCanvas.prototype.initProgram = function() {
 
         'void main()',
         '{',
-            'gl_Position = vertexPos;',
-            'textureCoord = texturePos.xy;',
+        'gl_Position = vertexPos;',
+        'textureCoord = texturePos.xy;',
         '}'
-        ].join('\n');
+    ].join('\n');
 
     var fragmentShaderScript = [
         'precision highp float;',
@@ -98,31 +99,31 @@ H264bsdCanvas.prototype.initProgram = function() {
         'uniform sampler2D vSampler;',
         'const mat4 YUV2RGB = mat4',
         '(',
-            '1.1643828125, 0, 1.59602734375, -.87078515625,',
-            '1.1643828125, -.39176171875, -.81296875, .52959375,',
-            '1.1643828125, 2.017234375, 0, -1.081390625,',
-            '0, 0, 0, 1',
+        '1.1643828125, 0, 1.59602734375, -.87078515625,',
+        '1.1643828125, -.39176171875, -.81296875, .52959375,',
+        '1.1643828125, 2.017234375, 0, -1.081390625,',
+        '0, 0, 0, 1',
         ');',
-      
+
         'void main(void) {',
-            'highp float y = texture2D(ySampler,  textureCoord).r;',
-            'highp float u = texture2D(uSampler,  textureCoord).r;',
-            'highp float v = texture2D(vSampler,  textureCoord).r;',
-            'gl_FragColor = vec4(y, u, v, 1) * YUV2RGB;',
+        'highp float y = texture2D(ySampler,  textureCoord).r;',
+        'highp float u = texture2D(uSampler,  textureCoord).r;',
+        'highp float v = texture2D(vSampler,  textureCoord).r;',
+        'gl_FragColor = vec4(y, u, v, 1) * YUV2RGB;',
         '}'
-        ].join('\n');
+    ].join('\n');
 
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderScript);
     gl.compileShader(vertexShader);
-    if(!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
         console.log('Vertex shader failed to compile: ' + gl.getShaderInfoLog(vertexShader));
     }
 
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragmentShader, fragmentShaderScript);
     gl.compileShader(fragmentShader);
-    if(!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
         console.log('Fragment shader failed to compile: ' + gl.getShaderInfoLog(fragmentShader));
     }
 
@@ -130,19 +131,19 @@ H264bsdCanvas.prototype.initProgram = function() {
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
-    if(!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
         console.log('Program failed to compile: ' + gl.getProgramInfoLog(program));
     }
 
     gl.useProgram(program);
-    
+
     this.shaderProgram = program;
 }
 
 /**
  * Initialize vertex buffers and attach to shader program
  */
-H264bsdCanvas.prototype.initBuffers = function() {
+H264bsdCanvas.prototype.initBuffers = function () {
     var gl = this.contextGL;
     var program = this.shaderProgram;
 
@@ -168,7 +169,7 @@ H264bsdCanvas.prototype.initBuffers = function() {
 /**
  * Initialize GL textures and attach to shader program
  */
-H264bsdCanvas.prototype.initTextures = function() {
+H264bsdCanvas.prototype.initTextures = function () {
     var gl = this.contextGL;
     var program = this.shaderProgram;
 
@@ -191,7 +192,7 @@ H264bsdCanvas.prototype.initTextures = function() {
 /**
  * Create and configure a single texture
  */
-H264bsdCanvas.prototype.initTexture = function() {
+H264bsdCanvas.prototype.initTexture = function () {
     var gl = this.contextGL;
 
     var textureRef = gl.createTexture();
@@ -210,27 +211,82 @@ H264bsdCanvas.prototype.initTexture = function() {
  * If this object is using WebGL, the data must be an I420 formatted ArrayBuffer,
  * Otherwise, data must be an RGBA formatted ArrayBuffer.
  */
-H264bsdCanvas.prototype.drawNextOutputPicture = function(width, height, croppingParams, data) {
+H264bsdCanvas.prototype.drawNextOutputPicture = function (width, height, croppingParams, data) {
     var gl = this.contextGL;
 
-    if(gl) {
+    if (gl) {
         this.drawNextOuptutPictureGL(width, height, croppingParams, data);
     } else {
         this.drawNextOuptutPictureRGBA(width, height, croppingParams, data);
     }
 }
 
+H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data, mbsHeight, mbsWidth) {
+
+    console.log("width, height", width, height)
+    console.log("drawNextOutputMbs -> data", mbsHeight, mbsWidth, data)
+
+    var canvas = this.mbcanvasElement;
+
+    var ctx = canvas.getContext('2d');
+    var imageData = ctx.getImageData(0, 0, width, height);
+    // imageData.data.set(origdata);
+
+    // console.log("imageData", typeof imageData, imageData.data.length)
+
+    var heightStep = height / mbsHeight
+    var widthStep = width / mbsWidth
+
+    console.log("heightStep", heightStep, widthStep)
+
+    // var positions = []
+    for (var j = 0; j < mbsHeight; j += 1) {
+        for (var i = 0; i < mbsWidth; i += 1) {
+            x = i * widthStep * 4 + 8 * 4
+            y = (j * heightStep + 8) * 4 * width 
+
+            // imageData.data[x + y] = 0
+            // imageData.data[x + y + 1] = 0
+            // imageData.data[x + y + 2] = 0
+            // imageData.data[x + y + 3] = 250
+
+            val = data.hor[i + j * mbsWidth]
+
+            // positions.push([i, j, x, y, val])
+
+            // imageData.data[x + y] = 250 - val     // R
+            // imageData.data[x + y + 1] = 250 - val // G
+            // imageData.data[x + y + 2] = 250 - val // B
+            imageData.data[x + y + 3] = val       // A
+
+            // console.log(i, j)
+            // rgba = rgba.concat([0,0,0,1])
+        }
+    }
+    // console.log(positions)
+
+    // imageData.data.set(imageData);
+
+    // if(croppingParams === null) {
+    ctx.putImageData(imageData, 0, 0);
+    // } else {
+    //     ctx.putImageData(imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
+    // }
+
+    // this.drawOutputMbsPicture
+}
+
 /**
  * Draw the next output picture using WebGL
  */
-H264bsdCanvas.prototype.drawNextOuptutPictureGL = function(width, height, croppingParams, data) {
+H264bsdCanvas.prototype.drawNextOuptutPictureGL = function (width, height, croppingParams, data) {
     var gl = this.contextGL;
     var texturePosBuffer = this.texturePosBuffer;
     var yTextureRef = this.yTextureRef;
     var uTextureRef = this.uTextureRef;
-    var vTextureRef = this.vTextureRef;    
+    var vTextureRef = this.vTextureRef;
 
-    if(croppingParams === null) {
+    if (croppingParams === null) {
         gl.viewport(0, 0, width, height);
     } else {
         gl.viewport(0, 0, croppingParams.width, croppingParams.height);
@@ -253,25 +309,25 @@ H264bsdCanvas.prototype.drawNextOuptutPictureGL = function(width, height, croppi
     gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, yData);
 
-    var cbDataLength = width/2 * height/2;
+    var cbDataLength = width / 2 * height / 2;
     var cbData = i420Data.subarray(yDataLength, yDataLength + cbDataLength);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, uTextureRef);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width/2, height/2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, cbData);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, cbData);
 
     var crDataLength = cbDataLength;
     var crData = i420Data.subarray(yDataLength + cbDataLength, yDataLength + cbDataLength + crDataLength);
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, vTextureRef);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width/2, height/2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, crData);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, crData);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); 
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
 
 /**
  * Draw next output picture using ARGB data on a 2d canvas.
  */
-H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function(width, height, croppingParams, data) {
+H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
     var canvas = this.canvasElement;
 
     var croppingParams = null;
@@ -282,7 +338,25 @@ H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function(width, height, crop
     var imageData = ctx.getImageData(0, 0, width, height);
     imageData.data.set(argbData);
 
-    if(croppingParams === null) {
+    if (croppingParams === null) {
+        ctx.putImageData(imageData, 0, 0);
+    } else {
+        ctx.putImageData(imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
+    }
+}
+
+H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
+    var canvas = this.canvasElement;
+
+    var croppingParams = null;
+
+    var argbData = data;
+
+    var ctx = canvas.getContext('2d');
+    var imageData = ctx.getImageData(0, 0, width, height);
+    imageData.data.set(argbData);
+
+    if (croppingParams === null) {
         ctx.putImageData(imageData, 0, 0);
     } else {
         ctx.putImageData(imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);

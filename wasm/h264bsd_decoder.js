@@ -34,7 +34,7 @@
  */
 
 
- 
+
 function H264bsdDecoder(module) {
     this.module = module;
     this.released = false;
@@ -73,7 +73,7 @@ H264bsdDecoder.NO_INPUT = 1024;
  * This value is only valid after at least one call to decode() has returned H264bsdDecoder.HDRS_RDY
  * You can also use onHeadersReady callback to determine when this value changes.
  */
-H264bsdDecoder.prototype.h264bsdProfile = function() {
+H264bsdDecoder.prototype.h264bsdProfile = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
@@ -83,37 +83,40 @@ H264bsdDecoder.prototype.h264bsdProfile = function() {
 /**
  * Returns the next output picture as an I420 encoded image.
  */
-H264bsdDecoder.prototype.mbs = function() {
+H264bsdDecoder.prototype.mbs = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
     // console.log("pStorage", pStorage)
 
-    var pBytes = module._h264bsdMbs(pStorage);
     var mbsOutputLength = module._h264bsdMbsPicSizeInMbs(pStorage);
-    console.log("mbsOutputLength", mbsOutputLength)
 
+    var pBytes = module._h264bsdMbsVer(pStorage);
     var outputLength = mbsOutputLength; // 4;//this.outputPictureSizeBytes();
-    var outputBytes = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
+    var outputBytesVer = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
 
-    return outputBytes;
-    
+    var pBytes = module._h264bsdMbsHor(pStorage);
+    var outputLength = mbsOutputLength; // 4;//this.outputPictureSizeBytes();
+    var outputBytesHor = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
+
+    return { ver: outputBytesVer, hor: outputBytesHor };
+
 };
 
-H264bsdDecoder.prototype.PicSizeInMbs = function() {
+H264bsdDecoder.prototype.PicSizeInMbs = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
     return module._h264bsdMbsPicSizeInMbs(pStorage);
 };
 
-H264bsdDecoder.prototype.PicHeightInMbs = function() {
+H264bsdDecoder.prototype.PicHeightInMbs = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
     return module._h264bsdMbsPicHeightInMbs(pStorage);
 };
-H264bsdDecoder.prototype.PicWidthInMbs = function() {
+H264bsdDecoder.prototype.PicWidthInMbs = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
@@ -138,7 +141,7 @@ H264bsdDecoder.prototype.PicWidthInMbs = function() {
 /**
  * Clean up memory used by the decoder
  */
-H264bsdDecoder.prototype.release = function() {
+H264bsdDecoder.prototype.release = function () {
     var module = this.module;
     var pStorage = this.pStorage;
     var pInput = this.pInput;
@@ -152,12 +155,12 @@ H264bsdDecoder.prototype.release = function() {
     var pTopOffset = this.pTopOffset;
     var pHeight = this.pHeight;
 
-    if(pStorage != 0) {
+    if (pStorage != 0) {
         module._h264bsdShutdown(pStorage);
         module._h264bsdFree(pStorage);
     }
 
-    if(pInput != 0) {
+    if (pInput != 0) {
         module._free(pInput);
     }
 
@@ -190,7 +193,7 @@ H264bsdDecoder.prototype.release = function() {
 /**
  * Queue ArrayBuffer data to be decoded
  */
-H264bsdDecoder.prototype.queueInput = function(data) {
+H264bsdDecoder.prototype.queueInput = function (data) {
     var module = this.module
     var pInput = this.pInput;
     var inputLength = this.inputLength;
@@ -200,7 +203,7 @@ H264bsdDecoder.prototype.queueInput = function(data) {
         data = new Uint8Array(data)
     }
 
-    if(pInput === 0) {
+    if (pInput === 0) {
         inputLength = data.byteLength;
         pInput = module._malloc(inputLength);
         inputOffset = 0;
@@ -229,7 +232,7 @@ H264bsdDecoder.prototype.queueInput = function(data) {
 /**
  * Returns the numbre of bytes remaining in the decode queue.
  */
-H264bsdDecoder.prototype.inputBytesRemaining = function() {
+H264bsdDecoder.prototype.inputBytesRemaining = function () {
     return this.inputLength - this.inputOffset;
 };
 
@@ -239,7 +242,7 @@ H264bsdDecoder.prototype.inputBytesRemaining = function() {
  * Pictures can be accessed using nextOutputPicture() or nextOutputPictureRGBA()
  * decode() will return H264bsdDecoder.NO_INPUT when there is no more data to be decoded.
  */
-H264bsdDecoder.prototype.decode = function() {
+H264bsdDecoder.prototype.decode = function () {
     var module = this.module;
     var pStorage = this.pStorage;
     var pInput = this.pInput;
@@ -247,9 +250,15 @@ H264bsdDecoder.prototype.decode = function() {
     var inputLength = this.inputLength;
     var inputOffset = this.inputOffset;
 
-    if(pInput == 0) return H264bsdDecoder.NO_INPUT;
+    if (pInput == 0) return H264bsdDecoder.NO_INPUT;
 
     var bytesRead = 0;
+
+    var date1 = new Date().getTime()
+
+    while(date1 > new Date().getTime() - 250) {
+    }
+
     var retCode = module._h264bsdDecode(pStorage, pInput + inputOffset, inputLength - inputOffset, 0, pBytesRead);
 
     if (retCode == H264bsdDecoder.RDY ||
@@ -260,7 +269,7 @@ H264bsdDecoder.prototype.decode = function() {
 
     inputOffset += bytesRead;
 
-    if(inputOffset >= inputLength) {
+    if (inputOffset >= inputLength) {
         module._free(pInput);
         pInput = 0;
         inputOffset = 0;
@@ -270,12 +279,12 @@ H264bsdDecoder.prototype.decode = function() {
     this.pInput = pInput;
     this.inputLength = inputLength;
     this.inputOffset = inputOffset;
-    
-    if(retCode == H264bsdDecoder.PIC_RDY && this.onPictureReady instanceof Function) {
+
+    if (retCode == H264bsdDecoder.PIC_RDY && this.onPictureReady instanceof Function) {
         this.onPictureReady();
     }
 
-    if(retCode == H264bsdDecoder.HDRS_RDY && this.onHeadersReady instanceof Function) {
+    if (retCode == H264bsdDecoder.HDRS_RDY && this.onHeadersReady instanceof Function) {
         this.onHeadersReady();
     }
 
@@ -285,7 +294,7 @@ H264bsdDecoder.prototype.decode = function() {
 /**
  * Returns the next output picture as an I420 encoded image.
  */
-H264bsdDecoder.prototype.nextOutputPicture = function() {
+H264bsdDecoder.prototype.nextOutputPicture = function () {
     var module = this.module;
     var pStorage = this.pStorage;
     var pPicId = this.pPicId;
@@ -305,7 +314,7 @@ H264bsdDecoder.prototype.nextOutputPicture = function() {
  * Note: There is extra overhead required to convert the image to RGBA.
  * This method should be avoided if possible.
  */
-H264bsdDecoder.prototype.nextOutputPictureRGBA = function() {
+H264bsdDecoder.prototype.nextOutputPictureRGBA = function () {
     var module = this.module;
     var pStorage = this.pStorage;
     var pPicId = this.pPicId;
@@ -325,7 +334,7 @@ H264bsdDecoder.prototype.nextOutputPictureRGBA = function() {
  * This value is only valid after at least one call to decode() has returned H264bsdDecoder.HDRS_RDY
  * You can also use onHeadersReady callback to determine when this value changes.
  */
-H264bsdDecoder.prototype.outputPictureWidth = function() {
+H264bsdDecoder.prototype.outputPictureWidth = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
@@ -337,7 +346,7 @@ H264bsdDecoder.prototype.outputPictureWidth = function() {
  * This value is only valid after at least one call to decode() has returned H264bsdDecoder.HDRS_RDY
  * You can also use onHeadersReady callback to determine when this value changes.
  */
-H264bsdDecoder.prototype.outputPictureHeight = function() {
+H264bsdDecoder.prototype.outputPictureHeight = function () {
     var module = this.module;
     var pStorage = this.pStorage;
 
@@ -348,7 +357,7 @@ H264bsdDecoder.prototype.outputPictureHeight = function() {
  * Returns integer byte length of output pictures in bytes.
  * This value is only valid after at least one call to decode() has returned H264bsdDecoder.HDRS_RDY
  */
-H264bsdDecoder.prototype.outputPictureSizeBytes = function() {
+H264bsdDecoder.prototype.outputPictureSizeBytes = function () {
     var width = this.outputPictureWidth();
     var height = this.outputPictureHeight();
 
@@ -359,7 +368,7 @@ H264bsdDecoder.prototype.outputPictureSizeBytes = function() {
  * Returns integer byte length of RGBA output pictures in bytes.
  * This value is only valid after at least one call to decode() has returned H264bsdDecoder.HDRS_RDY
  */
-H264bsdDecoder.prototype.outputPictureSizeBytesRGBA = function() {
+H264bsdDecoder.prototype.outputPictureSizeBytesRGBA = function () {
     var width = this.outputPictureWidth();
     var height = this.outputPictureHeight();
 
@@ -370,7 +379,7 @@ H264bsdDecoder.prototype.outputPictureSizeBytesRGBA = function() {
  * Returns the info used to crop output images to there final viewing dimensions.
  * If this method returns null no cropping info is provided and the full image should be presented.
  */
-H264bsdDecoder.prototype.croppingParams = function() {
+H264bsdDecoder.prototype.croppingParams = function () {
     var module = this.module;
     var pStorage = this.pStorage;
     var pCroppingFlag = this.pCroppingFlag;
@@ -387,7 +396,7 @@ H264bsdDecoder.prototype.croppingParams = function() {
     var topOffset = module.getValue(pTopOffset, 'i32');
     var height = module.getValue(pHeight, 'i32');
 
-    if(croppingFlag === 0) return null;
+    if (croppingFlag === 0) return null;
 
     return {
         'width': width,

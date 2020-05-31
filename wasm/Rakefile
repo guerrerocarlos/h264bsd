@@ -25,6 +25,8 @@ exported_functions = [
 	"_h264bsdMbsPicSizeInMbs",
 	"_h264bsdMbsPicHeightInMbs",
 	"_h264bsdMbsPicWidthInMbs",
+	"_h264bsdMbsHor",
+	"_h264bsdMbsVer",
 ]
 
 exported_runtime_methods = [

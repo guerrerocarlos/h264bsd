@@ -30,7 +30,7 @@ function onPictureReady() {
     var croppingParams = decoder.croppingParams();
     var output = decoder.nextOutputPicture();
     var mbs = decoder.mbs();
-    console.log('mbs:', mbs.buffer, mbs)
+    console.log('mbs:', mbs)
     console.log('mbsHeight:', decoder.PicHeightInMbs())
     console.log('mbsWidth:', decoder.PicWidthInMbs())
 
@@ -38,7 +38,9 @@ function onPictureReady() {
       'type' : 'pictureReady',
       'width' : width,
       'height' : height,
-      'mbs' : mbs.buffer,
+      'mbs' : mbs,
+      'mbsHeight': decoder.PicHeightInMbs(),
+      'mbsWidth': decoder.PicWidthInMbs(),
       'croppingParams' : croppingParams,
       'data' : output.buffer,
     }, [output.buffer]);

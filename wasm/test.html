@@ -6,26 +6,36 @@
     <title>h.264bsd test</title>
 </head>
 
+<style>
+    .viewer {
+        position: fixed;
+        left:0;
+    }
+</style>
+
+
 <body>
     <input type="file" id="file" name="file" />
     <span id="fps_display"></span>
     <br />
 
     <!--This is where we will display decoded frames-->
-    <canvas id="canvas" width="640" height="480" style="border:solid;"></canvas>
+    <canvas class="viewer" id="canvas" width="640" height="480" style="border:solid;"></canvas>
+    <canvas class="viewer" id="mbcanvas" width="640" height="480" style="border:solid;"></canvas>
 
     <script src="h264bsd_canvas.js"></script>
     <script src="stream.js"></script>
 
     <script type="text/javascript">
         var canvas = document.getElementById('canvas');
+        var mbcanvas = document.getElementById('mbcanvas');
 
         var pictureCount = 0;
         var lastPictureCount = 0;
 
         // Create the decoder and canvas
         var decoder = new Worker('h264bsd_worker.js');
-        var display = new H264bsdCanvas(canvas, false);
+        var display = new H264bsdCanvas(canvas, false, mbcanvas);
 
         console.log('Created decoder and canvas');
 
@@ -40,27 +50,46 @@
             switch (message.type) {
                 case 'pictureParams':
                     croppingParams = message.croppingParams;
+                    console.log("croppingParams", croppingParams)
                     if (croppingParams === null) {
                         canvas.width = message.width;
                         canvas.height = message.height;
+                        // mbcanvas.width = message.width;
+                        // mbcanvas.height = message.height;
                     } else {
                         canvas.width = croppingParams.width;
                         canvas.height = croppingParams.height;
+                        mbcanvas.width = croppingParams.width;
+                        mbcanvas.height = croppingParams.height;
                     }
                     break;
                 case 'noInput':
-                    var copy = new Uint8Array(buf);
-                    decoder.postMessage({
-                        'type': 'queueInput',
-                        'data': copy.buffer
-                    }, [copy.buffer]);
+                    // var copy = new Uint8Array(buf);
+                    // decoder.postMessage({
+                    //     'type': 'queueInput',
+                    //     'data': copy.buffer
+                    // }, [copy.buffer]);
                     break;
                 case 'pictureReady':
+                    console.log("picReady")
                     display.drawNextOutputPicture(
                         message.width,
                         message.height,
                         message.croppingParams,
-                        new Uint8Array(message.data));
+                        new Uint8Array(message.data),
+                        message.mbs,
+                        message.mbsHeight,
+                        message.mbsWidth,
+                    );
+                    display.drawMbs(
+                        message.width,
+                        message.height,
+                        message.croppingParams,
+                        // new Uint8Array(message.data),
+                        message.mbs,
+                        message.mbsHeight,
+                        message.mbsWidth,
+                        )
                     ++pictureCount;
                     break;
                 case 'decoderReady':
@@ -117,7 +146,8 @@
 
         setTimeout(() => {
             // handleFileSelect()
-            var stream = new Stream('./test_640x360.h264')
+            // var stream = new Stream('./test_640x360.h264')
+            var stream = new Stream('./test.h264')
             stream.readAll(null, fileOnload)
         }, 1000)
 
