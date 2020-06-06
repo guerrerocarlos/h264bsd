@@ -30,10 +30,10 @@ function onPictureReady() {
     var croppingParams = decoder.croppingParams();
     var output = decoder.nextOutputPicture();
     var mbs = decoder.mbs();
-    console.log('mbs:', mbs)
-    console.table(new Array(mbs.ver16).slice(0, 32))
-    console.log('mbsHeight:', decoder.PicHeightInMbs())
-    console.log('mbsWidth:', decoder.PicWidthInMbs())
+    // console.log('mbs:', mbs)
+    // console.table(new Array(mbs.ver16).slice(0, 32))
+    // console.log('mbsHeight:', decoder.PicHeightInMbs())
+    // console.log('mbsWidth:', decoder.PicWidthInMbs())
 
     postMessage({
       'type' : 'pictureReady',
