@@ -1154,6 +1154,56 @@ u8* h264bsdMbsVer(storage_t *pStorage)
     return result;
 }
 
+u8* h264bsdMbsVer16(storage_t *pStorage)
+{
+    u32 mbsSize = pStorage->picSizeInMbs;
+    i16 *result = malloc(sizeof(i16) * mbsSize * 16);
+    for(int i = 0 ; i < mbsSize ; i++) {
+        result[i*16] = pStorage->mb[i].mv->ver;
+        result[i*16+1] = (pStorage->mb[i].mv+1)->ver;
+        result[i*16+2] = (pStorage->mb[i].mv+2)->ver;
+        result[i*16+3] = (pStorage->mb[i].mv+3)->ver;
+        result[i*16+4] = (pStorage->mb[i].mv+4)->ver;
+        result[i*16+5] = (pStorage->mb[i].mv+5)->ver;
+        result[i*16+6] = (pStorage->mb[i].mv+6)->ver;
+        result[i*16+7] = (pStorage->mb[i].mv+7)->ver;
+        result[i*16+8] = (pStorage->mb[i].mv+8)->ver;
+        result[i*16+9] = (pStorage->mb[i].mv+9)->ver;
+        result[i*16+10] = (pStorage->mb[i].mv+10)->ver;
+        result[i*16+11] = (pStorage->mb[i].mv+11)->ver;
+        result[i*16+12] = (pStorage->mb[i].mv+12)->ver;
+        result[i*16+13] = (pStorage->mb[i].mv+13)->ver;
+        result[i*16+14] = (pStorage->mb[i].mv+14)->ver;
+        result[i*16+15] = (pStorage->mb[i].mv+15)->ver;
+    }
+    return result;
+}
+
+
+u8* h264bsdMbsHor16(storage_t *pStorage)
+{
+    u32 mbsSize = pStorage->picSizeInMbs;
+    i16 *result = malloc(sizeof(i16) * mbsSize * 16);
+    for(int i = 0 ; i < mbsSize ; i++) {
+        result[i*16] = pStorage->mb[i].mv->hor;
+        result[i*16+1] = (pStorage->mb[i].mv+1)->hor;
+        result[i*16+2] = (pStorage->mb[i].mv+2)->hor;
+        result[i*16+3] = (pStorage->mb[i].mv+3)->hor;
+        result[i*16+4] = (pStorage->mb[i].mv+4)->hor;
+        result[i*16+5] = (pStorage->mb[i].mv+5)->hor;
+        result[i*16+6] = (pStorage->mb[i].mv+6)->hor;
+        result[i*16+7] = (pStorage->mb[i].mv+7)->hor;
+        result[i*16+8] = (pStorage->mb[i].mv+8)->hor;
+        result[i*16+9] = (pStorage->mb[i].mv+9)->hor;
+        result[i*16+10] = (pStorage->mb[i].mv+10)->hor;
+        result[i*16+11] = (pStorage->mb[i].mv+11)->hor;
+        result[i*16+12] = (pStorage->mb[i].mv+12)->hor;
+        result[i*16+13] = (pStorage->mb[i].mv+13)->hor;
+        result[i*16+14] = (pStorage->mb[i].mv+14)->hor;
+        result[i*16+15] = (pStorage->mb[i].mv+15)->hor;
+    }
+    return result;
+}
 
 
 u8* h264bsdMbsPicSizeInMbs(storage_t *pStorage)

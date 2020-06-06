@@ -80,6 +80,24 @@ H264bsdDecoder.prototype.h264bsdProfile = function () {
     return module._h264bsdProfile(pStorage);
 };
 
+function twoBytesToi32(byteA, byteB) {
+    var sign = byteA & (1 << 7);
+    // var x = (((byteA & 0xFF) << 8) | (byteB & 0xFF));
+    // if (sign) {
+    //     return 0xFFFF0000 | x;  // fill in most significant bits with 1's
+    // } else {
+    //     return 0x00000000 | x;  // fill in most significant bits with 1's
+    // }
+    let bytes = [sign ? -1 : 0, sign ? -1 : 0, byteA, byteB];
+    let uint8bytes = Uint8Array.from(bytes);
+    let dataview = new DataView(uint8bytes.buffer);
+    let int32le = dataview.getInt32(0); // second parameter truethy == want little endian
+    // let int32be = dataview.getInt32(0); // second parameter absent or falsey == want big endian
+    // console.log(int32le); // -2088599168
+    // console.log(int32be); // -2138996093
+    return int32le
+}
+
 /**
  * Returns the next output picture as an I420 encoded image.
  */
@@ -95,11 +113,21 @@ H264bsdDecoder.prototype.mbs = function () {
     var outputLength = mbsOutputLength; // 4;//this.outputPictureSizeBytes();
     var outputBytesVer = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
 
+    var pBytes = module._h264bsdMbsHor16(pStorage);
+    var outputLength = mbsOutputLength * 16 * 2; // 4;//this.outputPictureSizeBytes();
+    var outputBytesHor16 = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
+    var i = 0;
+    var signedBytesHor16 = []
+    while (i < outputBytesHor16.length) {
+        signedBytesHor16.push(twoBytesToi32(outputBytesHor16[i], outputBytesHor16[i + 1]))
+        i += 2
+    }
+
     var pBytes = module._h264bsdMbsHor(pStorage);
     var outputLength = mbsOutputLength; // 4;//this.outputPictureSizeBytes();
     var outputBytesHor = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
 
-    return { ver: outputBytesVer, hor: outputBytesHor };
+    return { ver: outputBytesVer, hor: outputBytesHor, ver16: signedBytesHor16 };
 
 };
 
@@ -256,7 +284,7 @@ H264bsdDecoder.prototype.decode = function () {
 
     var date1 = new Date().getTime()
 
-    while(date1 > new Date().getTime() - 250) {
+    while (date1 > new Date().getTime() - 50) { // Carlos Sleep with while
     }
 
     var retCode = module._h264bsdDecode(pStorage, pInput + inputOffset, inputLength - inputOffset, 0, pBytesRead);
