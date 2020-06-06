@@ -243,55 +243,104 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
         imageData.data[i] = 0
     }
 
+    var divisor = 8
+
     // var positions = []
     for (var j = 0; j < mbsHeight; j += 1) {
         for (var i = 0; i < mbsWidth; i += 1) {
 
-            hval = data.hor[i + j * mbsWidth]
-            vval = data.ver[i + j * mbsWidth]
+            // hval = data.hor[i + j * mbsWidth]
+            // vval = data.ver[i + j * mbsWidth]
 
-            x = (i * widthStep) * 4 // + 8 * 4
-            y = (j * heightStep ) * 4 * width
+            x = (i * widthStep) * 4
+            y = (j * heightStep) * 4 * width
 
-            imageData.data[x + y + 3] = 250   
+            imageData.data[x + y + 3] = 250
+            for (var sqy = 0; sqy < 4; sqy++) {
+                for (var sqx = 0; sqx < 4; sqx++) {
+                    
+                    var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
+                    
+                    // values.push(value)
+                    x = (i * widthStep + sqx) * 4
+                    y = (j * heightStep + sqy) * 4 * width
 
-            for (var hv = 0; hv < (hval / 255 * 16); hv++) {
-                x = (i * widthStep + hv) * 4 + 8 * 4
-                y = (j * heightStep + 8) * 4 * width
-
-                // imageData.data[x + y] = 0
-                // imageData.data[x + y + 1] = 0
-                // imageData.data[x + y + 2] = 0
-                // imageData.data[x + y + 3] = 250
-
-
-                // positions.push([i, j, x, y, val])
-
-                // imageData.data[x + y] = 250 - val     // R
-                imageData.data[x + y + 1] = hval // G
-                // imageData.data[x + y + 2] = 250 - val // B
-                imageData.data[x + y + 3] = hval       // A
-
+                    if(hvalue >= 0) {
+                        imageData.data[x + y] = 0 //x / 10
+                        imageData.data[x + y + 1] = 0
+                        imageData.data[x + y + 2] = Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+                    } else {
+                        imageData.data[x + y] = 0//x / 10
+                        imageData.data[x + y + 1] = Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+                        imageData.data[x + y + 2] = 0
+                    }
+                    imageData.data[x + y + 3] = Math.sqrt(hvalue * hvalue) / divisor //parseInt(value) / 65536 * 256
+                }
             }
 
-            for (var vv = 0; vv < (vval / 255 * 16); vv++) {
-                x = (i * widthStep) * 4 + 8 * 4
-                y = (j * heightStep + 8 + vv) * 4 * width
+            for (var sqy = 0; sqy < 4; sqy++) {
+                for (var sqx = 0; sqx < 4; sqx++) {
+                    
+                    // var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
+                    var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
+                    
+                    // values.push(value)
+                    x = (i * widthStep + sqx) * 4 + 4 * 4
+                    y = (j * heightStep + sqy + 4) * 4 * width
 
-                // imageData.data[x + y] = 0
-                // imageData.data[x + y + 1] = 0
-                // imageData.data[x + y + 2] = 0
-                // imageData.data[x + y + 3] = 250
-
-
-                // positions.push([i, j, x, y, val])
-
-                // imageData.data[x + y] = 250 - val     // R
-                // imageData.data[x + y + 1] = 250 - val // G
-                imageData.data[x + y + 2] = 250 - hval // B
-                imageData.data[x + y + 3] = hval       // A
-
+                    if(vvalue >= 0) {
+                        imageData.data[x + y] = Math.abs(parseInt(vvalue)) / divisor//x / 10
+                        imageData.data[x + y + 1] = 0
+                        imageData.data[x + y + 2] = Math.abs(parseInt(vvalue)) / divisor//value / Math.pow(2, 16) * 255
+                    } else {
+                        imageData.data[x + y] = Math.abs(parseInt(vvalue)) / divisor //x / 10
+                        imageData.data[x + y + 1] = Math.abs(parseInt(vvalue)) / divisor//value / Math.pow(2, 16) * 255
+                        imageData.data[x + y + 2] = 0
+                    }
+                    imageData.data[x + y + 3] = Math.sqrt(vvalue * vvalue) / divisor //parseInt(value) / 65536 * 256
+                }
             }
+
+            // console.log(values)
+
+
+            // for (var hv = 0; hv < (hval / 255 * 16); hv++) {
+            //     x = (i * widthStep + hv) * 4 + 8 * 4
+            //     y = (j * heightStep + 8) * 4 * width
+
+            //     // imageData.data[x + y] = 0
+            //     // imageData.data[x + y + 1] = 0
+            //     // imageData.data[x + y + 2] = 0
+            //     // imageData.data[x + y + 3] = 250
+
+
+            //     // positions.push([i, j, x, y, val])
+
+            //     // imageData.data[x + y] = 250 - val     // R
+            //     imageData.data[x + y + 1] = hval // G
+            //     // imageData.data[x + y + 2] = 250 - val // B
+            //     imageData.data[x + y + 3] = hval       // A
+
+            // }
+
+            // for (var vv = 0; vv < (vval / 255 * 16); vv++) {
+            //     x = (i * widthStep) * 4 + 8 * 4
+            //     y = (j * heightStep + 8 + vv) * 4 * width
+
+            //     // imageData.data[x + y] = 0
+            //     // imageData.data[x + y + 1] = 0
+            //     // imageData.data[x + y + 2] = 0
+            //     // imageData.data[x + y + 3] = 250
+
+
+            //     // positions.push([i, j, x, y, val])
+
+            //     // imageData.data[x + y] = 250 - val     // R
+            //     // imageData.data[x + y + 1] = 250 - val // G
+            //     imageData.data[x + y + 2] = 250 - hval // B
+            //     imageData.data[x + y + 3] = hval       // A
+
+            // }
 
             // console.log(i, j)
             // rgba = rgba.concat([0,0,0,1])

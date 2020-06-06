@@ -123,11 +123,21 @@ H264bsdDecoder.prototype.mbs = function () {
         i += 2
     }
 
+    var pBytes = module._h264bsdMbsVer16(pStorage);
+    var outputLength = mbsOutputLength * 16 * 2; // 4;//this.outputPictureSizeBytes();
+    var outputBytesVer16 = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
+    var i = 0;
+    var signedBytesVer16 = []
+    while (i < outputBytesVer16.length) {
+        signedBytesVer16.push(twoBytesToi32(outputBytesVer16[i], outputBytesVer16[i + 1]))
+        i += 2
+    }
+
     var pBytes = module._h264bsdMbsHor(pStorage);
     var outputLength = mbsOutputLength; // 4;//this.outputPictureSizeBytes();
     var outputBytesHor = new Uint8Array(module.HEAPU8.subarray(pBytes, pBytes + outputLength));
 
-    return { ver: outputBytesVer, hor: outputBytesHor, ver16: signedBytesHor16 };
+    return { ver: outputBytesVer, hor: outputBytesHor, hor16: signedBytesHor16, ver16: signedBytesVer16 };
 
 };
 
