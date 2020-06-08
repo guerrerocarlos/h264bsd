@@ -1447,6 +1447,10 @@ u32 OutputPicture(dpbStorage_t *dpb)
     dpb->outBuf[dpb->numOut].numErrMbs = tmp->numErrMbs;
     dpb->numOut++;
 
+    for(int i = 0 ; i < 3200 ; i++) { // Carlos
+        dpb->outBuf[dpb->numOut].data[i] = 0; 
+    }
+
     tmp->toBeDisplayed = HANTRO_FALSE;
     if (!IS_REFERENCE(*tmp))
     {

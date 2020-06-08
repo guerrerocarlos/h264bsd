@@ -29,3 +29,11 @@ This project was heavily inspired by [Broadway.js](https://github.com/mbebenita/
 
 > ffmpeg -i test_telegram1.mp4 -vcodec copy -an -bsf:v h264_mp4toannexb test.h264
 > ffmpeg -i test_telegram1.mp4 -pix_fmt yuv420p -c:v libx264 -x264-params keyint=40 -profile:v baseline -f rawvideo test2.h264
+
+Ahora el paso es lograr saber realmente que cosas tienen mas movimiento que el fondo y en que proporción
+para ello debemos poder saber cual es el movimiento "general" de la camara o del "fondo" para poder restarle ese movimiento 
+al movimiento de todo y saber lo que realmente se está moviendo mas rápido que el fondo
+
+### Teoría 1:
+Llevar un registro de todos los valores de movimiento de los vectores, y determinar cual es el mas repetido, ese probablemente sea el 
+movimiento general, usar ese valor para restar a todos los vectores y obtener el movimiento de cada objeto sin tomar el cuenta el movimiento general

@@ -294,8 +294,8 @@ H264bsdDecoder.prototype.decode = function () {
 
     var date1 = new Date().getTime()
 
-    // while (date1 > new Date().getTime() - 25) { // Carlos Sleep with while
-    // }
+    while (date1 > new Date().getTime() - 1000) { // Carlos Sleep with while
+    }
 
     var retCode = module._h264bsdDecode(pStorage, pInput + inputOffset, inputLength - inputOffset, 0, pBytesRead);
 

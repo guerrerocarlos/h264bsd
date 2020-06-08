@@ -362,7 +362,7 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
                     var vvalue = -1 * parseInt(data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / divisor2 / parts * p)
                     
                     var barlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2)) 
-                    if(barlength < 7) {
+                    if(barlength < 500) {
 
                         for (var sqy = 0; sqy < 1; sqy++) {
                             for (var sqx = 0; sqx < 1; sqx++) {

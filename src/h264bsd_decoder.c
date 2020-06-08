@@ -461,6 +461,8 @@ u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u32 picId,
                     picReady = HANTRO_TRUE;
                     pStorage->skipRedundantSlices = HANTRO_TRUE;
                 }
+
+                // pStorage->dpb->outBuf[pStorage->dpb->numOut].data ;
                 break;
 
             case NAL_SEI:
@@ -611,7 +613,17 @@ u8* h264bsdNextOutputPicture(storage_t *pStorage, u32 *picId, u32 *isIdrPic,
     ASSERT(pStorage);
 
     pOut = h264bsdDpbOutputPicture(pStorage->dpb);
-    
+    if(pOut->isIdr) {
+        for(int i = 0 ; i < (854 * 480) ; i++) { // Carlos
+            pOut->data[i] = 100; 
+        }
+        for(int i = 0 ; i < (854 * 480) / 4 ; i++) { // Carlos
+            pOut->data[(854 * 480) + i] = i / (854 / 2) * 255 ;
+            pOut->data[(854 * 480) + i + 854 / 2] = 100 ;//i / (854 / 2) * 255; 
+            // pOut->data[(854 * 480) + i] = i % ( 854 * 2 ); 
+        }
+    }
+
     if (pOut != NULL)
     {
         *picId = pOut->picId;
