@@ -56,6 +56,7 @@
 #include "h264bsd_conceal.h"
 #include "h264bsd_storage.h"
 #include <time.h>
+#include <math.h>
 
 /*------------------------------------------------------------------------------
     2. External compiler flags
@@ -614,14 +615,50 @@ u8* h264bsdNextOutputPicture(storage_t *pStorage, u32 *picId, u32 *isIdrPic,
 
     pOut = h264bsdDpbOutputPicture(pStorage->dpb);
     if(pOut->isIdr) {
-        for(int i = 0 ; i < (854 * 480) ; i++) { // Carlos
-            pOut->data[i] = 100; 
+
+        int w = 854;
+        int h = 480;
+
+        int wmb = w / 18;
+        int hmb = h / 18;
+
+        int ySize = w * h;
+        int cbSize = w/2 * h/2;
+
+        int x = 0;
+        int y = 0;
+
+        for(int y = 0 ; y < h ; y ++) {
+            for(int x = 0 ; x < w ; x ++) {
+                // if(x % 32 == 0 || y % 32 == 0 ) {
+                //     pOut->data[y * (w + w % 8 + 4) + x] = 0 ; //(int)floor(x / 180) + (int)floor(y / 180);
+                // } else {
+                    pOut->data[y * (w + w % 8 + 4) + x] = x * 255 / w ; //(int)floor(x / 180) + (int)floor(y / 180);
+                // }
+            }
         }
-        for(int i = 0 ; i < (854 * 480) / 4 ; i++) { // Carlos
-            pOut->data[(854 * 480) + i] = i / (854 / 2) * 255 ;
-            pOut->data[(854 * 480) + i + 854 / 2] = 100 ;//i / (854 / 2) * 255; 
-            // pOut->data[(854 * 480) + i] = i % ( 854 * 2 ); 
+
+        for(int y = 0 ; y < h / 2 ; y ++) {
+            for(int x = 0 ; x < (w / 2 + (w % 8 - 1)) ; x ++) {
+                // if(x % 16 == 0 || y % 16 == 0 ) {
+                //     pOut->data[ySize + y * (w / 2 + (w % 8 - 1)) + x] = 0 ; // x * 255 / (w / 2 + (w % 8 - 1)) ;// * 255 / ( w / 2 )  ; //floor(x / wmb) / w * 256; 
+                // } else {
+                    pOut->data[ySize + y * (w / 2 + (w % 8 - 1)) + x] = 200 ; // x * 255 / (w / 2 + (w % 8 - 1)) ;// * 255 / ( w / 2 )  ; //floor(x / wmb) / w * 256; 
+                // }
+            }
         }
+
+        for(int y = 0 ; y < h / 2 ; y ++) {
+            for(int x = 0 ; x < (w / 2 + (w % 8 - 1)) ; x ++) {
+                // if(x % 16 == 0 || y % 16 == 0 ) {
+                    // pOut->data[cbSize + ySize + y * (w / 2 + (w % 8 - 1)) + x] = 0 ; // y * 255 / ( h / 2 ) ;  //x * 256 / ( w / 2 ) ; // y / ( h / 2 ) * 255 ; //floor(y / hmb) / h * 256; 
+                // } else {
+                    pOut->data[cbSize + ySize + y * (w / 2 + (w % 8 - 1)) + x] = y * 255 / ( h / 2 ) ;  //x * 256 / ( w / 2 ) ; // y / ( h / 2 ) * 255 ; //floor(y / hmb) / h * 256; 
+                // }
+            }
+        }
+
+
     }
 
     if (pOut != NULL)

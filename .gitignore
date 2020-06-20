@@ -26,3 +26,5 @@ posix/obj/
 test/*.yuv
 test/raw/
 test/output/
+*.mp4
+*.h264

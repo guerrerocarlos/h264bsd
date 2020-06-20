@@ -98,3 +98,7 @@ decoder.addEventListener('message', function(e) {
 decoder.postMessage({'type' : 'queueInput', 'data' : myUint8Array.buffer}, [myUint8Array.buffer]);
 
 ```
+
+
+
+ffmpeg -i ~/Downloads/2020-06-14\ 12.09.06\ PM.mp4 -codec:v libx264 -x264opts "keyint=600:min-keyint=600:no-scenecut" -profile:v baseline -c:a copy -y t10_nocuts.mp4
