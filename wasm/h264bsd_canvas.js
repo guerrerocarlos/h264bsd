@@ -24,9 +24,10 @@
  * This class can be used to render output pictures from an H264bsdDecoder to a canvas element.
  * If available the content is rendered using WebGL.
  */
-function H264bsdCanvas(canvas, forceNoGL, mbcanvas) {
+function H264bsdCanvas(canvas, forceNoGL, mbcanvas, rcanvas) {
     this.canvasElement = canvas;
     this.mbcanvasElement = mbcanvas;
+    this.rcanvas = rcanvas;
 
     if (!forceNoGL) this.initContextGL();
 
@@ -221,53 +222,97 @@ H264bsdCanvas.prototype.drawNextOutputPicture = function (width, height, croppin
     }
 }
 
+var printedCount = 0
+var ri = 15
+var rj = 10
+
 H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data, mbsHeight, mbsWidth) {
 
     console.log("width, height", width, height)
     console.log("drawNextOutputMbs -> data", mbsHeight, mbsWidth, data)
 
     var canvas = this.mbcanvasElement;
+    var rcanvas = this.rcanvas;
+
+    var rwidth = 1000;
+    var rheight = 700;
 
     var ctx = canvas.getContext('2d');
     var imageData = ctx.getImageData(0, 0, width, height);
     // imageData.data.set(origdata);
-
+    var rctx = rcanvas.getContext('2d');
+    var rimageData = rctx.getImageData(0, 0, rwidth, rheight);
     // console.log("imageData", typeof imageData, imageData.data.length)
 
-    var heightStep = height / mbsHeight
-    var widthStep = width / mbsWidth
+    var heightStep = height / mbsHeight;
+    var widthStep = width / mbsWidth;
 
-    console.log("heightStep", heightStep, widthStep)
+    var rheightStep = rheight / mbsHeight;
+    var rwidthStep = rwidth / mbsWidth;
 
-    for (var i = 0; i < imageData.data.length; i++) {
-        imageData.data[i] = 0
+    // console.log("heightStep", heightStep, widthStep);
+
+    for (var i = 0; i < rimageData.data.length; i++) {
+        rimageData.data[i] = rimageData.data[i] / 1.2;
     }
 
-    var divisor = 8 
-    var divisor2 = 400
-    var lineslengths = []
+    for (var i = 0; i < imageData.data.length; i++) {
+        imageData.data[i] = 0;
+    }
+
+    // var divisor = 8
+    // var divisor2 = 600
+    var vlineslengths = 0
+    var hlineslengths = 0
+    var vlineslengthsCount = 0
+    var hlineslengthsCount = 0
+    // var lengthsstats = {}
 
     for (var j = 0; j < mbsHeight; j += 1) {
         for (var i = 0; i < mbsWidth; i += 1) {
 
 
-                for (var sqy = 0; sqy < 1; sqy++) {
-                    for (var sqx = 0; sqx < 1; sqx++) {
-                        
-                        var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / divisor2
-                        var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / divisor2
-                        
-                        var barlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2)) 
+            for (var sqy = 0; sqy < 1; sqy++) {
+                for (var sqx = 0; sqx < 1; sqx++) {
 
-                        lineslengths.push(barlength)
-                    }
+                    var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] ;// divisor2
+                    var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] ; // divisor2
+                    // if(lengthsstats[hvalue] === undefined) {
+                    //     lengthsstats[hvalue] = 0;
+                    // }
+                    // lengthsstats[hvalue] ++;
+
+                    // var barlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2))
+
+
+                    vlineslengths += vvalue;
+                    vlineslengthsCount++;
+
+                    hlineslengths += hvalue;
+                    hlineslengthsCount++;
                 }
+            }
 
 
         }
     }
 
-    var averagelength = lineslengths.reduce((acc, len) => acc + len, 0) / lineslengths.length
+    // lengthsstatsByLength = []
+    // Object.keys(lengthsstats).forEach((len) => {
+    //     lengthsstatsByLength.push({
+    //         l: len,
+    //         n: lengthsstats[len]
+    //     })
+    // })
+
+    // lengthsstatsByLength = lengthsstatsByLength.sort((a, b) => a.n < b.n ? 1 : -1)
+    // if(printedCount % 100 == 0 && lengthsstatsByLength.length > 2 ) {
+    //     console.log('>>', lengthsstatsByLength)
+    // }
+    printedCount ++;
+    var vaveragelength = vlineslengths / vlineslengthsCount; // .reduce((acc, len) => acc + len, 0) / lineslengths.length
+    var haveragelength = hlineslengths / hlineslengthsCount; // .reduce((acc, len) => acc + len, 0) / lineslengths.length
+    // var averagelength = lineslengths / lineslengths.length
 
     // console.log("averagelength", averagelength)
     // var positions = []
@@ -280,9 +325,9 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
             // imageData.data[x + y + 3] = 250
             // for (var sqy = 0; sqy < 4; sqy++) {
             //     for (var sqx = 0; sqx < 4; sqx++) {
-                    
+
             //         var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
-                    
+
             //         // values.push(value)
             //         x = (i * widthStep + sqx) * 4
             //         y = (j * heightStep + sqy) * 4 * width
@@ -302,10 +347,10 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
 
             // for (var sqy = 0; sqy < 4; sqy++) {
             //     for (var sqx = 0; sqx < 4; sqx++) {
-                    
+
             //         // var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
             //         var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
-                    
+
             //         // values.push(value)
             //         x = (i * widthStep + sqx) * 4 + 4 * 4
             //         y = (j * heightStep + sqy + 4) * 4 * width
@@ -324,112 +369,145 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
             // }
 
 
-                // for (var sqy = 0; sqy < 1; sqy++) {
-                //     for (var sqx = 0; sqx < 1; sqx++) {
-                        
-                //         var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
-                //         var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
-                        
-                //         // values.push(value)
-                //         x = (i * widthStep + sqx) * 4
-                //         y = (j * heightStep + sqy) * 4 * width
+            // for (var sqy = 0; sqy < 1; sqy++) {
+            //     for (var sqx = 0; sqx < 1; sqx++) {
 
-                //         imageData.data[x + y ] = parseInt(i * 5) // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
-                //         imageData.data[x + y + 1] = parseInt(j * 8)
-                //         imageData.data[x + y + 2] = 0 // Math.abs(parseInt(vvalue)) / divisor
+            //         var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
+            //         var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
 
-                //         // if(hvalue >= 0) {
-                //         //     imageData.data[x + y] = 0 //(parseInt(vvalue)) / divisor + 100 //0 //x / 10
-                //         //     imageData.data[x + y + 1] = Math.abs(parseInt(hvalue)) / divisor
-                //         //     imageData.data[x + y + 2] = 0 //Math.abs(parseInt(hvalue)) / divisor //value / Math.pow(2, 16) * 255
-                //         // } else {
-                //         //     imageData.data[x + y ] = Math.abs(parseInt(hvalue)) / divisor // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
-                //         //     imageData.data[x + y + 1] = 0
-                //         //     imageData.data[x + y + 2] = 0 // Math.abs(parseInt(vvalue)) / divisor
-                //         // }
-                //         imageData.data[x + y + 3] = 254 //Math.sqrt(hvalue * hvalue) / divisor //parseInt(value) / 65536 * 256
-                //     }
-                // }
+            //         // values.push(value)
+            //         x = (i * widthStep + sqx) * 4
+            //         y = (j * heightStep + sqy) * 4 * width
 
-                var parts = 10
-                var hvalue = parseInt(data.hor16[(i + j * mbsWidth) * 16] / divisor2 )
-                var vvalue = parseInt(data.ver16[(i + j * mbsWidth) * 16 ] / divisor2 )
-                var fullbarlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2)) 
-                // console.log('fullbarlength', fullbarlength)
+            //         imageData.data[x + y ] = parseInt(i * 5) // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+            //         imageData.data[x + y + 1] = parseInt(j * 8)
+            //         imageData.data[x + y + 2] = 0 // Math.abs(parseInt(vvalue)) / divisor
 
-                for(var p = 1 ; p <= parts ; p++ ) {
-                    var hvalue = -1 * parseInt(data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / divisor2 / parts * p)
-                    var vvalue = -1 * parseInt(data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / divisor2 / parts * p)
-                    
-                    var barlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2)) 
-                    if(barlength < 500) {
+            //         // if(hvalue >= 0) {
+            //         //     imageData.data[x + y] = 0 //(parseInt(vvalue)) / divisor + 100 //0 //x / 10
+            //         //     imageData.data[x + y + 1] = Math.abs(parseInt(hvalue)) / divisor
+            //         //     imageData.data[x + y + 2] = 0 //Math.abs(parseInt(hvalue)) / divisor //value / Math.pow(2, 16) * 255
+            //         // } else {
+            //         //     imageData.data[x + y ] = Math.abs(parseInt(hvalue)) / divisor // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+            //         //     imageData.data[x + y + 1] = 0
+            //         //     imageData.data[x + y + 2] = 0 // Math.abs(parseInt(vvalue)) / divisor
+            //         // }
+            //         imageData.data[x + y + 3] = 254 //Math.sqrt(hvalue * hvalue) / divisor //parseInt(value) / 65536 * 256
+            //     }
+            // }
 
-                        for (var sqy = 0; sqy < 1; sqy++) {
-                            for (var sqx = 0; sqx < 1; sqx++) {
-                                
-                                // values.push(value)
-                                x = (i * widthStep + sqx) * 4 + hvalue * 4
-                                y = (j * heightStep + sqy + vvalue) * 4 * width
-        
-                                imageData.data[parseInt(x + y)] = ( fullbarlength - averagelength ) * 100 // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
-                                imageData.data[parseInt(x + y + 1)] = 0 // parseInt(j * 8)
-                                imageData.data[parseInt(x + y + 2)] = 0 // Math.abs(parseInt(vvalue)) / divisor
-        
-                                // if(hvalue >= 0) {
-                                //     imageData.data[x + y] = 0 //(parseInt(vvalue)) / divisor + 100 //0 //x / 10
-                                //     imageData.data[x + y + 1] = Math.abs(parseInt(hvalue)) / divisor
-                                //     imageData.data[x + y + 2] = 0 //Math.abs(parseInt(hvalue)) / divisor //value / Math.pow(2, 16) * 255
-                                // } else {
-                                //     imageData.data[x + y ] = Math.abs(parseInt(hvalue)) / divisor // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
-                                //     imageData.data[x + y + 1] = 0
-                                //     imageData.data[x + y + 2] = 0 // Math.abs(parseInt(vvalue)) / divisor
-                                // }
-                                imageData.data[x + y + 3] = 254 //Math.sqrt(hvalue * hvalue) / divisor //parseInt(value) / 65536 * 256
-                            }
+            var parts = 1
+            // var hvalue = parseInt(data.hor16[(i + j * mbsWidth) * 16] / divisor2)
+            // var vvalue = parseInt(data.ver16[(i + j * mbsWidth) * 16] / divisor2)
+
+            // var fullbarlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2))
+            // console.log('fullbarlength', fullbarlength)
+            var vaverage = vaveragelength //- 1200 //+ 1400//average / 3
+            var haverage = haveragelength //- 1200 //+ 1400//average / 3
+
+            for (var sqy = 0; sqy < 4; sqy++) {
+                for (var sqx = 0; sqx < 4; sqx++) {
+
+                    for (var p = 1; p <= parts; p++) { // draw many points to show a line in that direction of the value
+                        hvalue = (data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / parts * p)
+                        vvalue = (data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] / parts * p)
+
+                        // barlength = Math.sqrt(Math.pow(hvalue, 2) + Math.pow(vvalue, 2)) 
+                        // if(barlength < 500) {
+
+                        // values.push(value)
+                        // x = (i * widthStep + sqx * 4) * 4 + hvalue * 4
+                        // y = (j * heightStep + (sqy * 4) + vvalue) * 4 * width
+
+                        x = (i * widthStep + sqx * 4) * 4
+                        y = (j * heightStep + (sqy * 4)) * 4 * width
+
+                        // var average = lengthsstatsByLength[1].l
+                        // average += lengthsstatsByLength[2].l
+                        // average += lengthsstatsByLength[3].l
+                        // var addCount = 6
+                        // averagelength = lengthsstatsByLength.slice(1, addCount).reduce((acc, len) => acc + parseInt(len.l || 0), 0) / (addCount - 1)
+
+    // if(printedCount % 25 == 0 ) {
+    //     console.log('averagelength', averagelength)
+    // }
+
+                        tolerance = 1000
+                        if(false || hvalue > haverage - tolerance && hvalue < haverage + tolerance) 
+                        {
+                            var val = parseInt(hvalue / (16));//- (2048*2)
+                            imageData.data[x + y] = val < 0 ? (-1 * val) : val; //% 255 // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+                            imageData.data[x + y + 1] = val < 0 ? (-1 * val) : 0; //+ (vvalue * 100 / 4096) % 255 // parseInt(j * 8)
+                            imageData.data[x + y + 2] = val < 0 ? 0 : val; // Math.abs(parseInt(vvalue)) / divisor
+                            imageData.data[x + y + 3] = 250; //parseInt(barlength / 4000) //Math.sqrt(hvalue * hvalue) / divisor //parseInt(value) / 65536 * 256
+
+                            // ri += val
+
+
+                            // rimageData.data[x + y] = 0 ; //rimageData.data[x + y] - hvalue / 100; //val < 0 ? (-1 * val) : val; //% 255 // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+                            // rimageData.data[x + y + 1] = 0; //+ (vvalue * 100 / 4096) % 255 // parseInt(j * 8)
+                            // rimageData.data[x + y + 2] = 0; // Math.abs(parseInt(vvalue)) / divisor
+                            // rimageData.data[x + y + 3] = rimageData.data[x + y + 3] + Math.abs(hvalue-average) / 2 ;
+                            // rimageData.data[x + y + 3] = rimageData.data[x + y + 3] / 2;
                         }
 
+
+
+                        // if(hvalue >= 0) {
+                        //     imageData.data[x + y] = 0 //(parseInt(vvalue)) / divisor + 100 //0 //x / 10
+                        //     imageData.data[x + y + 1] = Math.abs(parseInt(hvalue)) / divisor
+                        //     imageData.data[x + y + 2] = 0 //Math.abs(parseInt(hvalue)) / divisor //value / Math.pow(2, 16) * 255
+                        // } else {
+                        //     imageData.data[x + y ] = Math.abs(parseInt(hvalue)) / divisor // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+                        //     imageData.data[x + y + 1] = 0
+                        //     imageData.data[x + y + 2] = 0 // Math.abs(parseInt(vvalue)) / divisor
+                        // }
                     }
                 }
 
-
-                // var sqy = 0
-                // var sqx = 0
-                // // for (var sqy = 0; sqy < 4; sqy++) {
-                // //     for (var sqx = 0; sqx < 4; sqx++) {
-                        
-                // var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
-                // var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
-    
-                // var pieces = 100
-    
-                // for(var di = 1 ; di <= pieces ; di ++) {
-    
-                // // for(var hi = Math.abs(hvalue) ; hi > 0 ; hi -= Math.abs(hvalue) / 10) {
-                // //     for(var vi = Math.abs(vvalue) ; vi > 0 ; vi -= Math.abs(vvalue) / 10) {
-                //         hi = hvalue / pieces * di / 1000
-                //         vi = vvalue / pieces * di / 1000
-    
-                //         x =  (i * widthStep + sqx) * 4 + hi * 4
-                //         y =  (j * heightStep + sqy + vi) * 4 * width
-    
-                //         // if(vvalue >= 0) {
-                //         //     imageData.data[x + y] = 0 //Math.abs(parseInt(vvalue)) / divisor//x / 10
-                //         //     imageData.data[x + y + 1] = 0
-                //         //     imageData.data[x + y + 2] = 0 //Math.abs(parseInt(vvalue)) / divisor//value / Math.pow(2, 16) * 255
-                //         // } else {
-                //             imageData.data[parseInt(x + y)] = 200 //Math.abs(parseInt(vvalue)) / divisor //x / 10
-                //             imageData.data[parseInt(x + y + 1)] = 0 //Math.abs(parseInt(vvalue)) / divisor//value / Math.pow(2, 16) * 255
-                //             imageData.data[parseInt(x + y + 2)] = 0
-                //         // }
-                //         imageData.data[x + y + 3] = 200 // Math.sqrt(vvalue * vvalue) / divisor //parseInt(value) / 65536 * 256
-    
-                // //     }
-                // // }
-                // // console.log('values', values)
-                // //     }
-                // // }
-    
                 // }
+            }
+
+
+
+            // var sqy = 0
+            // var sqx = 0
+            // // for (var sqy = 0; sqy < 4; sqy++) {
+            // //     for (var sqx = 0; sqx < 4; sqx++) {
+
+            // var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
+            // var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4]
+
+            // var pieces = 100
+
+            // for(var di = 1 ; di <= pieces ; di ++) {
+
+            // // for(var hi = Math.abs(hvalue) ; hi > 0 ; hi -= Math.abs(hvalue) / 10) {
+            // //     for(var vi = Math.abs(vvalue) ; vi > 0 ; vi -= Math.abs(vvalue) / 10) {
+            //         hi = hvalue / pieces * di / 1000
+            //         vi = vvalue / pieces * di / 1000
+
+            //         x =  (i * widthStep + sqx) * 4 + hi * 4
+            //         y =  (j * heightStep + sqy + vi) * 4 * width
+
+            //         // if(vvalue >= 0) {
+            //         //     imageData.data[x + y] = 0 //Math.abs(parseInt(vvalue)) / divisor//x / 10
+            //         //     imageData.data[x + y + 1] = 0
+            //         //     imageData.data[x + y + 2] = 0 //Math.abs(parseInt(vvalue)) / divisor//value / Math.pow(2, 16) * 255
+            //         // } else {
+            //             imageData.data[parseInt(x + y)] = 200 //Math.abs(parseInt(vvalue)) / divisor //x / 10
+            //             imageData.data[parseInt(x + y + 1)] = 0 //Math.abs(parseInt(vvalue)) / divisor//value / Math.pow(2, 16) * 255
+            //             imageData.data[parseInt(x + y + 2)] = 0
+            //         // }
+            //         imageData.data[x + y + 3] = 200 // Math.sqrt(vvalue * vvalue) / divisor //parseInt(value) / 65536 * 256
+
+            // //     }
+            // // }
+            // // console.log('values', values)
+            // //     }
+            // // }
+
+            // }
 
             // console.log(values)
 
@@ -479,9 +557,22 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
     // console.log(positions)
 
     // imageData.data.set(imageData);
+    ri+=haverage/12000
+    rj+=vaverage/12000
+    for (var sqy = 0; sqy < 4 * 4; sqy++) {
+        for (var sqx = 0; sqx < 4 * 4; sqx++) {
+            rx = parseInt(ri * rwidthStep + sqx ) * 4
+            ry = parseInt(rj * rheightStep + (sqy )) * 4 * rwidth
+            rimageData.data[rx + ry] = 240 ; //rimageData.data[x + y] - hvalue / 100; //val < 0 ? (-1 * val) : val; //% 255 // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
+            rimageData.data[rx + ry + 1] =100; //+ (vvalue * 100 / 4096) % 255 // parseInt(j * 8)
+            rimageData.data[rx + ry + 2] = 100; // Math.abs(parseInt(vvalue)) / divisor
+            rimageData.data[rx + ry + 3] = 240
+        }
+    }
 
     // if(croppingParams === null) {
     ctx.putImageData(imageData, 0, 0);
+    rctx.putImageData(rimageData, 0, 0);
     // } else {
     //     ctx.putImageData(imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
     // }
@@ -520,13 +611,13 @@ H264bsdCanvas.prototype.drawNextOuptutPictureGL = function (width, height, cropp
     var yData = i420Data.subarray(0, yDataLength);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, yTextureRef);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, yData);
+    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width, height, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, yData);
 
     var cbDataLength = width / 2 * height / 2;
     var cbData = i420Data.subarray(yDataLength, yDataLength + cbDataLength);
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, uTextureRef);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, cbData);
+    // gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, width / 2, height / 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, cbData);
 
     var crDataLength = cbDataLength;
     var crData = i420Data.subarray(yDataLength + cbDataLength, yDataLength + cbDataLength + crDataLength);
@@ -558,20 +649,20 @@ H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function (width, height, cro
     }
 }
 
-H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
-    var canvas = this.canvasElement;
+// H264bsdCanvas.prototype.drawNextOuptutPictureRGBA = function (width, height, croppingParams, data) {
+//     var canvas = this.canvasElement;
 
-    var croppingParams = null;
+//     var croppingParams = null;
 
-    var argbData = data;
+//     var argbData = data;
 
-    var ctx = canvas.getContext('2d');
-    var imageData = ctx.getImageData(0, 0, width, height);
-    imageData.data.set(argbData);
+//     var ctx = canvas.getContext('2d');
+//     var imageData = ctx.getImageData(0, 0, width, height);
+//     imageData.data.set(argbData);
 
-    if (croppingParams === null) {
-        ctx.putImageData(imageData, 0, 0);
-    } else {
-        ctx.putImageData(imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
-    }
-}
+//     if (croppingParams === null) {
+//         ctx.putImageData(imageData, 0, 0);
+//     } else {
+//         ctx.putImageData(imageData, -croppingParams.left, -croppingParams.top, 0, 0, croppingParams.width, croppingParams.height);
+//     }
+// }

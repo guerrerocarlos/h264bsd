@@ -20,8 +20,13 @@
     <br />
 
     <!--This is where we will display decoded frames-->
-    <canvas class="viewer" id="canvas" width="640" height="480" style="border:solid;"></canvas>
-    <canvas class="viewer" id="mbcanvas" width="640" height="480" style="border:solid;"></canvas>
+    <div>
+        <canvas class="viewer" id="canvas" width="640" height="480" style="border:solid;"></canvas>
+        <canvas class="viewer" id="mbcanvas" width="640" height="480" style="border:solid;"></canvas>
+    </div>
+    <div style="margin-top: 500px;">
+        <canvas class="" id="resultcanvas" width="1000" height="700" style="border:solid;left:0;top:700;"></canvas>
+    </div>
 
     <script src="h264bsd_canvas.js"></script>
     <script src="stream.js"></script>
@@ -29,13 +34,14 @@
     <script type="text/javascript">
         var canvas = document.getElementById('canvas');
         var mbcanvas = document.getElementById('mbcanvas');
+        var rcanvas = document.getElementById('resultcanvas');
 
         var pictureCount = 0;
         var lastPictureCount = 0;
 
         // Create the decoder and canvas
         var decoder = new Worker('h264bsd_worker.js');
-        var display = new H264bsdCanvas(canvas, false, mbcanvas);
+        var display = new H264bsdCanvas(canvas, false, mbcanvas, rcanvas);
 
         console.log('Created decoder and canvas');
 

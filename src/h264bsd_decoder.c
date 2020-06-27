@@ -633,7 +633,7 @@ u8* h264bsdNextOutputPicture(storage_t *pStorage, u32 *picId, u32 *isIdrPic,
                 // if(x % 32 == 0 || y % 32 == 0 ) {
                 //     pOut->data[y * (w + w % 8 + 4) + x] = 0 ; //(int)floor(x / 180) + (int)floor(y / 180);
                 // } else {
-                    pOut->data[y * (w + w % 8 + 4) + x] = x * 255 / w ; //(int)floor(x / 180) + (int)floor(y / 180);
+                    pOut->data[y * (w + w % 8 + 4) + x] = x * 255 / ( w * 2 ) ; //(int)floor(x / 180) + (int)floor(y / 180);
                 // }
             }
         }
