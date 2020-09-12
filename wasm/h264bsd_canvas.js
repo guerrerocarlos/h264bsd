@@ -224,8 +224,8 @@ H264bsdCanvas.prototype.drawNextOutputPicture = function (width, height, croppin
 }
 
 var printedCount = 0
-var ri = 15
-var rj = 0
+var ri = 2
+var rj = 5
 
 H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data, mbsHeight, mbsWidth) {
 
@@ -268,8 +268,8 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
     for (var j = 0; j < mbsHeight; j += 1) {
         for (var i = 0; i < mbsWidth; i += 1) {
 
-            for (var sqy = 0; sqy < 1; sqy++) {
-                for (var sqx = 0; sqx < 1; sqx++) {
+            for (var sqy = 0; sqy < 4; sqy++) {
+                for (var sqx = 0; sqx < 4; sqx++) {
 
                     var hvalue = data.hor16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] ;// divisor2
                     var vvalue = data.ver16[(i + j * mbsWidth) * 16 + sqx + sqy * 4] ; // divisor2
@@ -362,7 +362,11 @@ H264bsdCanvas.prototype.drawMbs = function (width, height, croppingParams, data,
             // rimageData.data[rx * 4 + ry * 4] = 0 ; //rimageData.data[x + y] - hvalue / 100; //val < 0 ? (-1 * val) : val; //% 255 // (parseInt(hvalue)) / divisor + 100 //Math.abs(parseInt(hvalue)) / divisor//value / Math.pow(2, 16) * 255
             // rimageData.data[rx * 4 + ry * 4 + 1] =100; //+ (vvalue * 100 / 4096) % 255 // parseInt(j * 8)
             if(this.mvsums[parseInt(x + y * 1000)]) {
-                rimageData.data[4 * ( (x + rx) + (y + ry) * 1000 ) ] = this.mvsums[parseInt(x + y * 1000)] //this.mvsums[x + y]; // Math.abs(parseInt(vvalue)) / divisor
+                if(this.mvsums[parseInt(x + y * 1000)] > 0) {
+                    rimageData.data[4 * ( (x + rx) + (y + ry) * 1000 ) ] = this.mvsums[parseInt(x + y * 1000)] //this.mvsums[x + y]; // Math.abs(parseInt(vvalue)) / divisor
+                } else {
+                    rimageData.data[4 * ( (x + rx) + (y + ry) * 1000 ) + 2] = -1 * this.mvsums[parseInt(x + y * 1000)] //this.mvsums[x + y]; // Math.abs(parseInt(vvalue)) / divisor
+                }
                 rimageData.data[4 * ( (x + rx) + (y + ry) * 1000 ) + 3] = 256;
             }
         }
